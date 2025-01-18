@@ -1,0 +1,59 @@
+// {
+// 	"extends": "./.svelte-kit/tsconfig.json",
+// 	"compilerOptions": {
+// 		"allowJs": true,
+// 		"checkJs": true,
+// 		"esModuleInterop": true,
+// 		"forceConsistentCasingInFileNames": true,
+// 		"resolveJsonModule": true,
+// 		"skipLibCheck": true,
+// 		"sourceMap": true,
+// 		"strict": true,
+// 		"module": "NodeNext",
+// 		"moduleResolution": "NodeNext",
+
+// 		"strictNullChecks": false,
+// 		"allowImportingTsExtensions": true,
+
+// 		"target": "es2017",
+// 		// "module": "esnext",
+
+// 		"jsx": "preserve",
+// 		"jsxImportSource": "svelte",
+// 		"lib": ["dom", "dom.iterable", "esnext"]
+// 	},
+// 	"include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte"]
+// }
+
+{
+	"extends": "./.svelte-kit/tsconfig.json",
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+
+		"sourceMap": true,
+
+		"strictNullChecks": false,
+		"allowImportingTsExtensions": true,
+
+		"target": "es2017",
+		"module": "esnext",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"jsx": "preserve",
+		"jsxImportSource": "svelte",
+		"lib": ["dom", "dom.iterable", "esnext"]
+	},
+	"include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte", "src/service-worker.js"]
+
+	// Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
+	// except $lib which is handled by https://kit.svelte.dev/docs/configuration#files
+	//
+	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
+	// from the referenced tsconfig.json - TypeScript does not merge them in
+}
