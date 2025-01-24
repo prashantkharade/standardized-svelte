@@ -24,21 +24,21 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
 export const load = async () => {
-	const user = formDataArray.find((user) => user.id === 1);
+ const user = formDataArray.find((user) => user.id === 1);
 
-	if (!user) {
-		return {
-			status: 404,
-			error: new Error('User not found')
-		};
-	}
+ if (!user) {
+  return {
+   status: 404,
+   error: new Error('User not found')
+  };
+ }
 
-	if (!user) error(404, 'Not found');
+ if (!user) error(404, 'Not found');
 
-	const form = await superValidate(user, zod(schema));
+ const form = await superValidate(user, zod(schema));
 
-	// Always return { form } in load functions
-	return { form };
+ // Always return { form } in load functions
+ return { form };
 };
 ```
 
@@ -55,42 +55,42 @@ const {(form, errors, constraints, message, enhance)} = superForm(data.form);
 
 ```html
 <div>
-	<label for="firstName">First Name</label>
-	<input
-		name="FirstName"
-		bind:value={$form.FirstName}
-		aria-invalid={$errors.FirstName ? 'true' : undefined}
-		{...$constraints.FirstName}
-	/>
+ <label for="firstName">First Name</label>
+ <input
+  name="FirstName"
+  bind:value={$form.FirstName}
+  aria-invalid={$errors.FirstName ? 'true' : undefined}
+  {...$constraints.FirstName}
+ />
 
-	{#if $errors.FirstName}
-		<p class="mt-1 text-sm text-red-500">{$errors.FirstName}</p>
-	{/if}
+ {#if $errors.FirstName}
+  <p class="mt-1 text-sm text-red-500">{$errors.FirstName}</p>
+ {/if}
 </div>
 ```
 
-# Form action
+## Form action
 
 ```js
 export const actions = {
-	create: async ({ request }) => {
-		console.log('Form submitted');
-		// The adapter must be defined before superValidate for JSON Schema.
-		const adapter = zod(schema);
-		const form = await superValidate(request, adapter);
+ create: async ({ request }) => {
+  console.log('Form submitted');
+  // The adapter must be defined before superValidate for JSON Schema.
+  const adapter = zod(schema);
+  const form = await superValidate(request, adapter);
 
-		console.log(form);
+  console.log(form);
 
-		if (!form.valid) {
-			// Again, return { form } and things will just work.
-			return fail(400, { form });
-		}
+  if (!form.valid) {
+   // Again, return { form } and things will just work.
+   return fail(400, { form });
+  }
 
-		// TODO: Do something with the validated form.data
+  // TODO: Do something with the validated form.data
 
-		// Display a success status message
-		return message(form, 'Form posted successfully!');
-	}
+  // Display a success status message
+  return message(form, 'Form posted successfully!');
+ }
 };
 ```
 
@@ -121,7 +121,7 @@ _Similar to validate, validateForm lets you validate the whole form and return a
 const result = await validateForm();
 
 if (result.valid) {
-	// ...
+ // ...
 }
 
 // You can use the update option to trigger a client-side validation
@@ -139,7 +139,7 @@ const result2 = await validateForm({ schema: zod(partialSchema) });
 
 ```js
 if (user.Email === form.data.Email) {
-	return setError(form, 'Email', 'E-mail already exists.');
+ return setError(form, 'Email', 'E-mail already exists.');
 }
 ```
 
@@ -151,17 +151,16 @@ If no data was posted or sent to superValidate, no errors will be returned unles
 
 ```js
 export const load = async () => {
-	// No errors set, since no data is sent to superValidate
-	const form = await superValidate(zod(schema));
+ // No errors set, since no data is sent to superValidate
+ const form = await superValidate(zod(schema));
 
-	// No data, but errors can still be added with an option
-	const form2 = await superValidate(zod(schema), { errors: true });
+ // No data, but errors can still be added with an option
+ const form2 = await superValidate(zod(schema), { errors: true });
 };
 ```
 
 > errorSelector
 > This is the CSS selector used to locate the invalid input fields after form submission. The default is `[aria-invalid="true"],[data-invalid]`, and the first one found in the form will be scrolled to and focused on, depending on the other settings.
-
 > scrollToError
 > The `scrollToError` option determines how to scroll to the first error message in the form. smooth and auto are values from Window.scroll. If the non-string options are used, Element.scrollIntoView will be called with the option. This is mostly used with nested scrollbars, in which case Window.scroll won’t work.
 
@@ -171,9 +170,9 @@ _Since validation is handled by Superforms, there is no need for spreading `$con
 
 ```js
 const { form, enhance } = superForm(data.form, {
-	customValidity: true,
-	// Not required, but will use client-side validation for real-time error display:
-	validators: schema
+ customValidity: true,
+ // Not required, but will use client-side validation for real-time error display:
+ validators: schema
 });
 ```
 
@@ -199,17 +198,17 @@ There are also three extra properties in the Superforms onSubmit event, for more
 
 If you’re using nested data, the formData property cannot be used to modify the posted data, since $form is serialized and posted instead. If you want to post something else than $form, you can do it with the jsonData function:
 
-### 2. validators
+#### 2. validators
 
 For advanced validation, you can change client-side validators for the current form submission with this function
 
-### 3. customRequest
+#### 3. customRequest
 
 You can make a custom request with fetch or XMLHttpRequest when submitting the form. The main use case is to display a progress bar when uploading large files.
 
 The customRequest option takes a function that should return a Promise<Response | XMLHttpRequest>. In the case of an XMLHttpRequest, the promise must be resolved after the request is complete. The response body should contain an ActionResult, as any form action does.
 
-## onResult
+### onResult
 
 `onResult: ({ result, formElement, cancel }) => void`
 
@@ -217,14 +216,14 @@ If the submission isn’t cancelled and client-side validation succeeds, the for
 
 result contains the ActionResult. You can modify it; changes will be applied further down the event chain. formElement is the HTMLFormElement of the form. cancel() is a function which will cancel the rest of the event chain and any form updates.
 
-## onUpdate
+### onUpdate
 
 onUpdate: ({ form, formElement, cancel, result }) => void
 The onUpdate event is triggered right before the form update is being applied, giving you the option to modify the validation result in form, or use cancel() to negate the update altogether. You also have access to the form’s HTMLFormElement with formElement.
 
 If your app is a single-page application, onUpdate is the most convenient to process the form data. See the SPA page for more details.
 
-## onUpdated
+### onUpdated
 
 `onUpdated: ({ form }) => void`
 
@@ -232,19 +231,19 @@ If you just want to ensure that the form is validated and do something extra aft
 
 The form parameter contains the validation result, and should be considered read-only here, since the stores have updated at this point. Unlike the previous events, $form, $errors and the other stores now contain updated data.
 
-## onError
+### onError
 
 `onError: (({ result }) => void) | 'apply'`
 
 When the SvelteKit error function is called on the server, you can use the onError event to catch it. result is the error ActionResult, with its error property:
 
-## onChange
+### onChange
 
 The onChange event is not triggered when submitting, but every time $form is modified, both as a html event (when modified with bind:value) and programmatically (direct assignment to $form).
 
 The event is a discriminated union that you can distinguish between using the target property:
 
-## Loading timers / spinners
+### Loading timers / spinners
 
 Just import and define the time of timers
 
@@ -269,7 +268,7 @@ Use
 </form>
 ```
 
-## Multiple Form handling by superform
+### Multiple Form handling by superform
 
 - Define schemas for each form
 - Export them from load function
@@ -311,21 +310,21 @@ export const actions = {
 
 ```js
 const {
-	form: loginForm,
-	errors: loginForm,
-	enhance: loginForm,
-	message: loginForm
+ form: loginForm,
+ errors: loginForm,
+ enhance: loginForm,
+ message: loginForm
 } = superForm(data.loginForm, {
-	resetForm: true
+ resetForm: true
 });
 
 const {
-	form: registerForm,
-	errors: registerErrors,
-	enhance: registerEnhance,
-	message: registerMessage
+ form: registerForm,
+ errors: registerErrors,
+ enhance: registerEnhance,
+ message: registerMessage
 } = superForm(data.registerForm, {
-	resetForm: true
+ resetForm: true
 });
 ```
 
@@ -339,7 +338,7 @@ const {
  Last Name: <input name="password" type="password" bind:value={$form.password} />
 ```
 
-# Snapshot
+## 3 Snapshot
 
 A nice SvelteKit feature is snapshots, which saves and restores data when the user navigates on the site. This is perfect for saving the form state, and with Superforms, you can take advantage of this in one line of code,
 
@@ -347,7 +346,7 @@ A nice SvelteKit feature is snapshots, which saves and restores data when the us
 
 `export const snapshot = { capture, restore };`
 
-# Submit behavior
+### Submit behavior
 
 When a form is submitted, it’s important for the UX to show that things are happening on the server. Superforms provides you with loading timers and the following options for handling this:
 
@@ -360,13 +359,13 @@ const { form, enhance } = superForm(data.form, {
 })
 ```
 
-### clearOnSubmit
+#### clearOnSubmit
 
 The `clearOnSubmit` option decides what should happen to the form when submitting. It can clear the status message, all the errors, both, or none. The default is to clear the message.
 
 If you don’t want any jumping content, which could occur when errors and messages are removed from the DOM, setting it to none can be useful.
 
-### multipleSubmits
+#### multipleSubmits
 
 This one handles the occurence of multiple form submissions, before a result has been returned.
 
@@ -374,30 +373,30 @@ This one handles the occurence of multiple form submissions, before a result has
 - abort is the next sensible approach, which will cancel the previous request before submitting again.
 - Finally, allow will pass through any number of frenetic clicks on the submit button!
 
-## FIle, Object and Array Validation
+### FIle, Object and Array Validation
 
 schemas
 
 ```js
 export const schema = z.object({
-	file: z
-		.instanceof(File)
-		.refine((file) => file.size <= 2 * 1024 * 1024, 'File must be less than 2MB')
-		.refine((file) => ['image/jpeg', 'image/png'].includes(file.type), 'File must be a JPEG or PNG')
+ file: z
+  .instanceof(File)
+  .refine((file) => file.size <= 2 * 1024 * 1024, 'File must be less than 2MB')
+  .refine((file) => ['image/jpeg', 'image/png'].includes(file.type), 'File must be a JPEG or PNG')
 });
 
 export const schema = z.object({
-	user: z.object({
-		name: z.string().min(1, 'Name is required'),
-		age: z.number().min(18, 'Age must be 18 or older')
-	})
+ user: z.object({
+  name: z.string().min(1, 'Name is required'),
+  age: z.number().min(18, 'Age must be 18 or older')
+ })
 });
 
 export const schema = z.object({
-	items: z
-		.array(z.string().min(1, 'Item cannot be empty'))
-		.min(1, 'At least one item is required')
-		.max(5, 'No more than 5 items allowed')
+ items: z
+  .array(z.string().min(1, 'Item cannot be empty'))
+  .min(1, 'At least one item is required')
+  .max(5, 'No more than 5 items allowed')
 });
 ```
 
@@ -405,12 +404,12 @@ form for file
 
 ```html
 <form method="post" enctype="multipart/form-data" use:enhance>
-	<label for="file">Upload a file (JPEG/PNG under 2MB):</label>
-	<input type="file" name="file" bind:value="{$form.file}" />
-	{#if $form.errors.file}
-	<p class="error">{$form.errors.file}</p>
-	{/if}
-	<button type="submit">Submit</button>
+ <label for="file">Upload a file (JPEG/PNG under 2MB):</label>
+ <input type="file" name="file" bind:value="{$form.file}" />
+ {#if $form.errors.file}
+ <p class="error">{$form.errors.file}</p>
+ {/if}
+ <button type="submit">Submit</button>
 </form>
 ```
 
@@ -418,19 +417,19 @@ form for Object
 
 ```html
 <form method="post" use:enhance>
-	<label for="name">Name:</label>
-	<input type="text" name="user.name" bind:value="{$form.user.name}" />
-	{#if $form.errors['user.name']}
-	<p class="error">{$form.errors['user.name']}</p>
-	{/if}
+ <label for="name">Name:</label>
+ <input type="text" name="user.name" bind:value="{$form.user.name}" />
+ {#if $form.errors['user.name']}
+ <p class="error">{$form.errors['user.name']}</p>
+ {/if}
 
-	<label for="age">Age:</label>
-	<input type="number" name="user.age" bind:value="{$form.user.age}" />
-	{#if $form.errors['user.age']}
-	<p class="error">{$form.errors['user.age']}</p>
-	{/if}
+ <label for="age">Age:</label>
+ <input type="number" name="user.age" bind:value="{$form.user.age}" />
+ {#if $form.errors['user.age']}
+ <p class="error">{$form.errors['user.age']}</p>
+ {/if}
 
-	<button type="submit">Submit</button>
+ <button type="submit">Submit</button>
 </form>
 ```
 
@@ -438,16 +437,16 @@ form for Array
 
 ```html
 <form method="post" use:enhance>
-	<label for="items">Add Items:</label>
-	{#each $form.items as item, index}
-	<div>
-		<input type="text" name="items[]" bind:value="{$form.items[index]}" />
-	</div>
-	{/each} {#if $form.errors.items}
-	<p class="error">{$form.errors.items}</p>
-	{/if}
+ <label for="items">Add Items:</label>
+ {#each $form.items as item, index}
+ <div>
+  <input type="text" name="items[]" bind:value="{$form.items[index]}" />
+ </div>
+ {/each} {#if $form.errors.items}
+ <p class="error">{$form.errors.items}</p>
+ {/if}
 
-	<button type="button" on:click="{()" ="">$form.items.push('')}>Add Item</button>
-	<button type="submit">Submit</button>
+ <button type="button" on:click="{()" ="">$form.items.push('')}>Add Item</button>
+ <button type="submit">Submit</button>
 </form>
 ```
