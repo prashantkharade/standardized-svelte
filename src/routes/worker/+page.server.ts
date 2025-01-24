@@ -13,7 +13,7 @@ export const actions: Actions = {
         }
 
         // Simulate saving to a database or other processing
-        console.log('Received Data from server:', { name, role });
+        console.log('Received Data from action server:', { name, role });
 
         return { success: true, message: 'Form submitted successfully!' };
     },

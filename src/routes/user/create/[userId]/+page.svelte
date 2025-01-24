@@ -14,24 +14,76 @@ Form page.svelte 'script' section structure
 -->
 <script lang="ts">
 	import { afterNavigate, goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { schema, formDataArray } from '$lib';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	// import type { PageServerData } from '../$types';
 
 	let { data } = $props();
-    // let data:PageServerData;
+	// let data:PageServerData;
+	import { onMount } from 'svelte';
+	import { storeInIndexedDB, getAllFromIndexedDB, clearIndexedDB } from '$lib/utils/indexedDBUtils';
+	// import { enhance } from '$app/forms';
 
-    let originalData = {
-        FirstName: data.form.data.FirstName,
-        LastName: data.form.data.LastName,
-        CountryCode: data.form.data.CountryCode,
-        Phone: data.form.data.Phone,
-        Email: data.form.data.Email,
-        Username: data.form.data.Username,
-        Password: data.form.data.Password
-    };
+	let isOffline = false;
+	const formName = 'UserAccountForm';
+	// Monitor network status
+	onMount(() => {
+		isOffline = !navigator.onLine;
+		window.addEventListener('online', handleOnline);
+		window.addEventListener('offline', () => (isOffline = true));
+		checkAndSyncData();
+	});
+
+	async function handleOnline() {
+		isOffline = false;
+		await checkAndSyncData(); // Sync offline data when back online
+	}
+
+	async function submitForm(event: Event) {
+		event.preventDefault();
+		const formElement = event.target as HTMLFormElement;
+		const formData = new FormData(formElement);
+		const data = Object.fromEntries(formData.entries());
+
+		if (isOffline) {
+			console.log('Offline. Storing data in IndexedDB.');
+			await storeInIndexedDB(formName, data);
+		} else {
+			console.log('Online. Submitting data via form action.');
+			formElement.submit(); // Submit form to the action directly
+		}
+	}
+
+	async function checkAndSyncData() {
+		const offlineData = await getAllFromIndexedDB(formName);
+		if (offlineData.length > 0) {
+			for (const data of offlineData) {
+				// Send the data to the server using fetch
+				try {
+					await fetch('/api/server/submit', {
+						method: 'POST',
+						body: JSON.stringify(data),
+						headers: { 'Content-Type': 'application/json' }
+					});
+				} catch (error) {
+					console.error('Failed to sync data:', error);
+				}
+			}
+			await clearIndexedDB(formName); // Clear synced data from IndexedDB
+		}
+	}
+
+	let originalData = {
+		FirstName: data.form.data.FirstName,
+		LastName: data.form.data.LastName,
+		CountryCode: data.form.data.CountryCode,
+		Phone: data.form.data.Phone,
+		Email: data.form.data.Email,
+		Username: data.form.data.Username,
+		Password: data.form.data.Password
+	};
 
 	const { form, enhance, constraints, validate, validateForm, message, errors } = superForm(
 		data.form,
@@ -48,13 +100,13 @@ Form page.svelte 'script' section structure
 		}
 	);
 
-    // Function to reset form to its original values
-    function resetForm() {
-        form.set({ ...originalData }); // Clone original data into the form
-    }
+	// Function to reset form to its original values
+	function resetForm() {
+		form.set({ ...originalData }); // Clone original data into the form
+	}
 
 	const init = () => {
-		const userId = $page.params.userId;
+		const userId = page.params.userId;
 		console.log('userId', userId);
 
 		originalData.FirstName = data.form.data.FirstName;
@@ -107,9 +159,15 @@ Form page.svelte 'script' section structure
 
 		{#if $message}<h3 class="text-bold text-blue-600">{$message}</h3>{/if}
 
-		<form class="w-full space-y-4" method="post" use:enhance action="?/create">
+		<form
+			class="w-full space-y-4"
+			method="post"
+			use:enhance
+			action="?/create"
+			onsubmit={submitForm}
+		>
 			<div>
-				<label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+				<label for="FirstName" class="block text-sm font-medium text-gray-700">First Name</label>
 				<input
 					name="FirstName"
 					type="text"
@@ -126,7 +184,7 @@ Form page.svelte 'script' section structure
 			</div>
 
 			<div>
-				<label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+				<label for="LastName" class="block text-sm font-medium text-gray-700">Last Name</label>
 				<input
 					type="text"
 					placeholder="Enter last name"
@@ -142,7 +200,7 @@ Form page.svelte 'script' section structure
 			</div>
 
 			<div>
-				<label for="countryCode" class="block text-sm font-medium text-gray-700">Country Code</label
+				<label for="CountryCode" class="block text-sm font-medium text-gray-700">Country Code</label
 				>
 				<input
 					type="text"
@@ -159,7 +217,7 @@ Form page.svelte 'script' section structure
 			</div>
 
 			<div>
-				<label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+				<label for="Phone" class="block text-sm font-medium text-gray-700">Phone</label>
 				<input
 					name="Phone"
 					type="number"
@@ -175,7 +233,7 @@ Form page.svelte 'script' section structure
 			</div>
 
 			<div>
-				<label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+				<label for="Email" class="block text-sm font-medium text-gray-700">Email</label>
 				<input
 					name="Email"
 					type="email"
@@ -191,7 +249,7 @@ Form page.svelte 'script' section structure
 			</div>
 
 			<div>
-				<label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+				<label for="Username" class="block text-sm font-medium text-gray-700">Username</label>
 				<input
 					name="Username"
 					type="text"
@@ -207,7 +265,7 @@ Form page.svelte 'script' section structure
 			</div>
 
 			<div>
-				<label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+				<label for="Password" class="block text-sm font-medium text-gray-700">Password</label>
 				<input
 					name="Password"
 					type="password"

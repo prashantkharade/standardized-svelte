@@ -19,7 +19,7 @@
 	</a>
 	<br />
 
-	<a href="/user/create/drag-and-drop">
+	<a href="/user/drag-and-drop">
 		<button class="text-blue-600 underline">Go To drag and drop </button>
 	</a>
 	<br />

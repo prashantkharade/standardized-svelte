@@ -9,8 +9,8 @@ import { build, files, version } from '$service-worker';
 const CACHE_NAME = `cache-v1-${version}`;
 const ASSETS = [...build, ...files];
 
-const DB_NAME = 'sync-offline-submissions';
-const STORE_NAME = 'submissions';
+// const DB_NAME = 'sync-offline-submissions';
+// const STORE_NAME = 'submissions';
 
 // Cache static assets on install
 // sw.addEventListener('install', (event) => {
@@ -38,61 +38,68 @@ sw.addEventListener('activate', (event) => {
 	event.waitUntil(deleteOldCaches());
 });
 
+// service-worker.js
+// sw.addEventListener("message", (event) => {
+// 	// event is an ExtendableMessageEvent object
+// 	console.log(`The client sent me a message: ${event.data}`);
+
+// 	event.source.postMessage("Hi client");
+// });
 
 
 // Utility functions for IndexedDB
-function openDatabase() {
-	return new Promise((resolve, reject) => {
-		const request = indexedDB.open(DB_NAME, 1);
+// function openDatabase() {
+// 	return new Promise((resolve, reject) => {
+// 		const request = indexedDB.open(DB_NAME, 1);
 
-		request.onupgradeneeded = (event) => {
-			const db = event.target.result;
-			if (!db.objectStoreNames.contains(STORE_NAME)) {
-				db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-			}
-		};
+// 		request.onupgradeneeded = (event) => {
+// 			const db = event.target.result;
+// 			if (!db.objectStoreNames.contains(STORE_NAME)) {
+// 				db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+// 			}
+// 		};
 
-		request.onsuccess = () => resolve(request.result);
-		request.onerror = () => reject(request.error);
-	});
-}
+// 		request.onsuccess = () => resolve(request.result);
+// 		request.onerror = () => reject(request.error);
+// 	});
+// }
 
-async function saveToIndexedDB(data) {
-	console.log('Saving to IndexedDB...',data);
-	const db = await openDatabase();
-	return await new Promise((resolve, reject) => {
-		const transaction = db.transaction(STORE_NAME, 'readwrite');
-		const store = transaction.objectStore(STORE_NAME);
+// async function saveToIndexedDB(data) {
+// 	console.log('Saving to IndexedDB...',data);
+// 	const db = await openDatabase();
+// 	return await new Promise((resolve, reject) => {
+// 		const transaction = db.transaction(STORE_NAME, 'readwrite');
+// 		const store = transaction.objectStore(STORE_NAME);
 
-		const request = store.add(data);
-		request.onsuccess = () => resolve(request.result);
-		request.onerror = () => reject(request.error);
-	});
-}
+// 		const request = store.add(data);
+// 		request.onsuccess = () => resolve(request.result);
+// 		request.onerror = () => reject(request.error);
+// 	});
+// }
 
-async function getAllFromIndexedDB() {
-	const db = await openDatabase();
-	return await new Promise((resolve, reject) => {
-		const transaction = db.transaction(STORE_NAME, 'readonly');
-		const store = transaction.objectStore(STORE_NAME);
+// async function getAllFromIndexedDB() {
+// 	const db = await openDatabase();
+// 	return await new Promise((resolve, reject) => {
+// 		const transaction = db.transaction(STORE_NAME, 'readonly');
+// 		const store = transaction.objectStore(STORE_NAME);
 
-		const request = store.getAll();
-		request.onsuccess = () => resolve(request.result);
-		request.onerror = () => reject(request.error);
-	});
-}
+// 		const request = store.getAll();
+// 		request.onsuccess = () => resolve(request.result);
+// 		request.onerror = () => reject(request.error);
+// 	});
+// }
 
-async function deleteFromIndexedDB(id) {
-	const db = await openDatabase();
-	return await new Promise((resolve, reject) => {
-		const transaction = db.transaction(STORE_NAME, 'readwrite');
-		const store = transaction.objectStore(STORE_NAME);
+// async function deleteFromIndexedDB(id) {
+// 	const db = await openDatabase();
+// 	return await new Promise((resolve, reject) => {
+// 		const transaction = db.transaction(STORE_NAME, 'readwrite');
+// 		const store = transaction.objectStore(STORE_NAME);
 
-		const request = store.delete(id);
-		request.onsuccess = () => resolve(request.result);
-		request.onerror = () => reject(request.error);
-	});
-}
+// 		const request = store.delete(id);
+// 		request.onsuccess = () => resolve(request.result);
+// 		request.onerror = () => reject(request.error);
+// 	});
+// }
 // IndexedDB utility functions (same as your provided code)
 sw.addEventListener('fetch', (event) => {
 	// ignore POST requests etc
@@ -144,43 +151,43 @@ sw.addEventListener('fetch', (event) => {
 });
 // Handle offline form submissions
 
-sw.addEventListener('fetch', (event) => {
-	if (event.request.method === 'POST' && event.request.url.includes('/submit')) {
-		event.respondWith(
-			(async () => {
-				try {
-					const response = await fetch(event.request.clone());
-					return response;
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				} catch (error) {
-					const formData = await event.request.clone().formData();
-					const data = {};
-					formData.forEach((value, key) => {
-						data[key] = value;
-					});
+// sw.addEventListener('fetch', (event) => {
+// 	if (event.request.method === 'POST' && event.request.url.includes('/submit')) {
+// 		event.respondWith(
+// 			(async () => {
+// 				try {
+// 					const response = await fetch(event.request.clone());
+// 					return response;
+// 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// 				} catch (error) {
+// 					const formData = await event.request.clone().formData();
+// 					const data = {};
+// 					formData.forEach((value, key) => {
+// 						data[key] = value;
+// 					});
 
-					// Save to IndexedDB
-					await saveToIndexedDB(data);
+// 					// Save to IndexedDB
+// 					await saveToIndexedDB(data);
 
-					// Register sync event
-					if ('serviceWorker' in navigator && 'SyncManager' in window) {
-						navigator.serviceWorker.ready.then((registration) => {
-							return registration.sync.register('sync-offline-submissions');
-						});
-					}
+// 					// Register sync event
+// 					if ('serviceWorker' in navigator && 'SyncManager' in window) {
+// 						navigator.serviceWorker.ready.then((registration) => {
+// 							return registration.sync.register('sync-offline-submissions');
+// 						});
+// 					}
 
-					return new Response(
-						JSON.stringify({
-							success: false,
-							message: 'Offline: Form data saved locally.',
-						}),
-						{ status: 200, headers: { 'Content-Type': 'application/json' } }
-					);
-				}
-			})()
-		);
-	}
-});
+// 					return new Response(
+// 						JSON.stringify({
+// 							success: false,
+// 							message: 'Offline: Form data saved locally.',
+// 						}),
+// 						{ status: 200, headers: { 'Content-Type': 'application/json' } }
+// 					);
+// 				}
+// 			})()
+// 		);
+// 	}
+// });
 
 // Background sync for submitting data
 // sw.addEventListener('sync', (event) => {
@@ -212,40 +219,40 @@ sw.addEventListener('fetch', (event) => {
 // 	}
 // });
 
-self.addEventListener('sync', (event) => {
-	if (event.tag === 'sync-offline-submissions') {
-		event.waitUntil(syncOfflineData());
-	}
-});
+// self.addEventListener('sync', (event) => {
+// 	if (event.tag === 'sync-offline-submissions') {
+// 		event.waitUntil(syncOfflineData());
+// 	}
+// });
 
-async function syncOfflineData() {
-	console.log('Syncing offline submissions...');
+// async function syncOfflineData() {
+// 	console.log('Syncing offline submissions...');
 
-	// Retrieve data from IndexedDB
-	const db = await openDatabase(); // Function to open IndexedDB
-	const submissions = await getAllFromIndexedDB(db); // Get all offline submissions
+// 	// Retrieve data from IndexedDB
+// 	const db = await openDatabase(); // Function to open IndexedDB
+// 	const submissions = await getAllFromIndexedDB(db); // Get all offline submissions
 
-	for (const submission of submissions) {
-		try {
-			// Attempt to send the submission to the server
-			const response = await fetch(`./api/server/submit`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(submission),
-			});
+// 	for (const submission of submissions) {
+// 		try {
+// 			// Attempt to send the submission to the server
+// 			const response = await fetch(`./api/server/submit`, {
+// 				method: 'POST',
+// 				headers: { 'Content-Type': 'application/json' },
+// 				body: JSON.stringify(submission),
+// 			});
 
-			if (response.ok) {
-				console.log(`Synced submission ID ${submission.id}`);
-				// Remove the submission from IndexedDB if successfully synced
-				await deleteFromIndexedDB(db, submission.id);
-			} else {
-				console.error(`Failed to sync submission ID ${submission.id}`);
-			}
-		} catch (err) {
-			console.error('Error syncing submission', err);
-		}
-	}
-}
+// 			if (response.ok) {
+// 				console.log(`Synced submission ID ${submission.id}`);
+// 				// Remove the submission from IndexedDB if successfully synced
+// 				await deleteFromIndexedDB(db, submission.id);
+// 			} else {
+// 				console.error(`Failed to sync submission ID ${submission.id}`);
+// 			}
+// 		} catch (err) {
+// 			console.error('Error syncing submission', err);
+// 		}
+// 	}
+// }
 
 // sw.addEventListener('online', () => {
 // 	console.log('Browser is back online. Attempting to sync offline submissions.');

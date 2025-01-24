@@ -47,8 +47,10 @@ export const load = async () => {
 ## in page.svelte for normal form with validation
 
 ```js
-import {superForm} from 'sveltekit-superforms'; import SuperDebug from 'sveltekit-superforms'; let {data}
-= $props(); const {(form, errors, constraints, message, enhance)} = superForm(data.form);
+import {superForm} from 'sveltekit-superforms';
+import SuperDebug from 'sveltekit-superforms';
+let {data} = $props(); 
+const {(form, errors, constraints, message, enhance)} = superForm(data.form);
 ```
 
 ```html
