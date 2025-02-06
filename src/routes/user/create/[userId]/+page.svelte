@@ -13,18 +13,17 @@ Form page.svelte 'script' section structure
     // Define reactive staments (In Svelte 5, define them through Runes)
 -->
 <script lang="ts">
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { schema, formDataArray } from '$lib';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	// import type { PageServerData } from '../$types';
+	import { storeInIndexedDB, getAllFromIndexedDB, clearIndexedDB } from '$lib/utils/indexedDBUtils';
+	import { onMount } from 'svelte';
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	let { data } = $props();
-	// let data:PageServerData;
-	import { onMount } from 'svelte';
-	import { storeInIndexedDB, getAllFromIndexedDB, clearIndexedDB } from '$lib/utils/indexedDBUtils';
-	// import { enhance } from '$app/forms';
 
 	let isOffline = false;
 	const formName = 'UserAccountForm';
@@ -135,7 +134,48 @@ Form page.svelte 'script' section structure
 		// 	Password: '' // Optionally reset the password
 		// });
 	}
+
+	// beforeNavigate(({ cancel }) => {
+	// 	if (dirty) {
+	// 		if (
+	// 			!confirm(
+	// 				'Are you sure you want to leave this page? You have unsaved changes that will be lost.'
+	// 			)
+	// 		) {
+	// 			cancel();
+	// 		}
+	// 	}
+	// });
+	let isFormDirty = false;
+
+	function handleInputChange() {
+		isFormDirty = true;
+	}
+
+	// Add event listener to warn user about unsaved changes
+	onMount(() => {
+		// Add event listener to warn user about unsaved changes
+		window.addEventListener('beforeunload', (event) => {
+			if (isFormDirty) {
+				event.preventDefault();
+				event.returnValue = '';
+			}
+		});
+
+		// Clean up the event listener when component is destroyed
+		return () => {
+			window.removeEventListener('beforeunload', (event) => {
+				if (isFormDirty) {
+					event.preventDefault();
+					event.returnValue = '';
+				}
+			});
+		};
+	});
 </script>
+
+
+	<a href="/worker" class="text-blue-600 underline" >Go to worker</a>
 
 <div class="flex">
 	<div class="w-1/6 bg-gray-100 p-4">
@@ -165,6 +205,7 @@ Form page.svelte 'script' section structure
 			use:enhance
 			action="?/create"
 			onsubmit={submitForm}
+			
 		>
 			<div>
 				<label for="FirstName" class="block text-sm font-medium text-gray-700">First Name</label>
@@ -176,6 +217,7 @@ Form page.svelte 'script' section structure
 					bind:value={$form.FirstName}
 					aria-invalid={$errors.FirstName ? 'true' : undefined}
 					{...$constraints.FirstName}
+					
 				/>
 
 				{#if $errors.FirstName}

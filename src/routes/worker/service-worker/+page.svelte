@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { storeInIndexedDB, getAllFromIndexedDB, clearIndexedDB } from '$lib/utils/indexedDBUtils';
-	import { afterNavigate, beforeNavigate } from '$app/navigation';
+	import { afterNavigate } from '$app/navigation';
 	import { workerSchema } from '$lib';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -10,64 +10,13 @@
 
 	let isOffline = $state();
 	const formName = 'anotherForm';
-	let hasUnsavedChanges = false; // Tracks unsaved changes
 
-	// Original data for reset purposes
-	let originalData = {
-		email: data.form.data.email,
-		age: data.form.data.age
-	};
-
-	// Initialize form and enhance with superforms
-	const { form, enhance, constraints, validate, validateForm, message, errors } = superForm(
-		data.form,
-		{
-			validationMethod: 'oninput',
-			validators: zodClient(workerSchema),
-			errorSelector: '[aria-invalid="true"],[data-invalid]',
-			scrollToError: 'smooth',
-			autoFocusOnError: 'detect',
-			customValidity: true
-		}
-	);
-
-	// Check for offline state and sync data
 	onMount(() => {
 		isOffline = !navigator.onLine;
 		window.addEventListener('online', handleOnline);
 		window.addEventListener('offline', () => (isOffline = true));
-		window.addEventListener('beforeunload', confirmNavigation);
-
-		beforeNavigate(({ cancel }) => {
-			if (hasUnsavedChanges && !confirm('You have unsaved changes. Do you really want to leave?')) {
-				cancel();
-			}
-		});
-
 		checkAndSyncData();
 	});
-
-	// Clean up listeners
-	// onDestroy(() => {
-	// 	window.removeEventListener('beforeunload', confirmNavigation);
-	// 	window.removeEventListener('online', handleOnline);
-	// 	window.removeEventListener('offline', () => (isOffline = true));
-	// });
-
-	// Handle form changes to track unsaved changes
-	function handleFormChange() {
-		hasUnsavedChanges = true;
-	}
-
-	// Confirm navigation or window closure
-	function confirmNavigation(event: BeforeUnloadEvent) {
-		// event.preventDefault();
-		if (hasUnsavedChanges) {
-			const message = 'You have unsaved changes. Do you really want to leave?';
-			event.returnValue = message; // Required for some browsers
-			return message;
-		}
-	}
 
 	async function handleOnline() {
 		isOffline = false;
@@ -87,8 +36,6 @@
 			console.log('Online. Submitting data via form action.');
 			formElement.submit();
 		}
-
-		hasUnsavedChanges = false; // Reset unsaved changes after successful submission
 	}
 
 	async function checkAndSyncData() {
@@ -109,9 +56,28 @@
 		}
 	}
 
+	let originalData = {
+		email: data.form.data.email,
+		age: data.form.data.age
+	};
+
+	const { form, enhance, constraints, validate, validateForm, message, errors } = superForm(
+		data.form,
+		{
+			//   validators: ClientValidationAdapter<S> | 'clear' | false,
+			validationMethod: 'oninput',
+			//   customValidity: boolean = false
+			validators: zodClient(workerSchema),
+			errorSelector: '[aria-invalid="true"],[data-invalid]',
+			scrollToError: 'smooth',
+			autoFocusOnError: 'detect',
+			stickyNavbar: undefined,
+			customValidity: true
+		}
+	);
+
 	function resetForm() {
 		form.set({ ...originalData });
-		hasUnsavedChanges = false; // Reset unsaved changes when form is reset
 	}
 
 	const init = () => {
@@ -132,10 +98,9 @@
 	<h1 class="text-2xl font-bold">Another Form</h1>
 	<form
 		use:enhance
-		method="POST"
+		method="post"
 		action="?/another"
 		onsubmit={submitForm}
-		onchange={handleFormChange}
 		class="mt-4 flex flex-col gap-4"
 	>
 		<div>
@@ -158,7 +123,7 @@
 				id="age"
 				name="age"
 				type="number"
-				placeholder="Enter your age"
+				placeholder="Enter Your age"
 				class="mt-1 w-full rounded-md border border-gray-300 p-2"
 				required
 				bind:value={$form.age}
