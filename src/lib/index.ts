@@ -45,38 +45,38 @@ export const formDataArray_ =
     Password_: "password123",
 }
 
-// export const schema = z.object({
-//     FirstName: z
-//         .string()
-//         .min(5, { message: 'First name must be at least 5 characters long.' })
-//         .max(20, { message: 'First name must be at most 20 characters long.' }),
-//     LastName: z.string()
-//         .min(5, { message: 'Last name must be at least 5 characters long.' })
-//         .max(20, { message: 'Last name must be at most 20 characters long.' }),
-//     CountryCode: z
-//         .string(),
-//     // .startsWith("+", { message: "Must provide country code" }),
-//     Phone: z
-//         .number()
-//         .gt(1000000000, { message: "Phone number must be at least 10 digits long" })
-//         .lt(9999999999, { message: "Phone number must be at most 10 digits long" }),
-//     Email: z
-//         .string()
-//         .email({ message: "Invalid email address" }),
-//     Username: z
-//         .string(),
-//     Password: z
-//         .string(),
-//     // Image: z
-//     //     .instanceof(File, { message: 'Please upload a file.' })
-//     //     .refine((f) => f.size < 100_000, 'Max 100 kB upload size.')
-// });
-
 export const schema = z.object({
-    image: z
-        .instanceof(File, { message: 'Please upload a file.' })
-        .refine((f) => f.size < 100_000, 'Max 100 kB upload size.')
+    FirstName: z
+        .string()
+        .min(5, { message: 'First name must be at least 5 characters long.' })
+        .max(20, { message: 'First name must be at most 20 characters long.' }),
+    LastName: z.string()
+        .min(5, { message: 'Last name must be at least 5 characters long.' })
+        .max(20, { message: 'Last name must be at most 20 characters long.' }),
+    CountryCode: z
+        .string(),
+    // .startsWith("+", { message: "Must provide country code" }),
+    Phone: z
+        .number()
+        .gt(1000000000, { message: "Phone number must be at least 10 digits long" })
+        .lt(9999999999, { message: "Phone number must be at most 10 digits long" }),
+    Email: z
+        .string()
+        .email({ message: "Invalid email address" }),
+    Username: z
+        .string(),
+    Password: z
+        .string(),
+    // Image: z
+    //     .instanceof(File, { message: 'Please upload a file.' })
+    //     .refine((f) => f.size < 100_000, 'Max 100 kB upload size.')
 });
+
+// export const schema = z.object({
+//     image: z
+//         .instanceof(File, { message: 'Please upload a file.' })
+//         .refine((f) => f.size < 100_000, 'Max 100 kB upload size.')
+// });
 
 export { draggable } from './utils/drag-and-drop.ts';
 export { dropzone } from './utils/drag-and-drop.ts';
@@ -106,4 +106,12 @@ export type DroppedItem = Button & {
 };
 
 
-
+export const workerSchema= z.object({
+    age: z
+        .number()
+        .gt(0, { message: "Age must be atleast 1 year old" })
+        .lt(99, { message: "Age must be leass than 99 years" }),
+    email: z
+        .string()
+        .email({ message: "Invalid email address" }),
+});

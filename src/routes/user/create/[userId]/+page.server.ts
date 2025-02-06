@@ -17,7 +17,7 @@ export const load = async (event: RequestEvent) => {
 
     if (!user) error(404, 'Not found');
 
-    const form = await superValidate(user,zod(schema), { errors: true });
+    const form = await superValidate(user, zod(schema), { errors: true });
 
     return { form };
 };
